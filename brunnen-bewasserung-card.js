@@ -212,10 +212,31 @@
           height: 8px;
           overflow: hidden;
           margin: 8px 0;
+          position: relative;
         }
         .bar-fill {
           height: 100%;
           transition: width 0.6s ease;
+        }
+        .bar-bg.zone-bar {
+          height: 28px;
+          border-radius: 8px;
+        }
+        .bar-bg.zone-bar .bar-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+        .bar-bg.zone-bar .bar-label {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.85em;
+          font-weight: 600;
+          color: var(--primary-text-color);
+          text-shadow: 0 0 4px var(--card-background-color, white);
         }
         .buttons {
           display: flex;
@@ -538,12 +559,9 @@
             <span class="muted">Restzeit</span>
             <span>${restzeitMin} min</span>
           </div>
-          <div class="bar-bg">
+          <div class="bar-bg zone-bar">
             <div class="bar-fill" style="width:${barPct}%; background:${color}"></div>
-          </div>
-          <div class="row">
-            <span class="muted">Etappe</span>
-            <span>${fmtMinSec(etappeS)}</span>
+            <div class="bar-label">${fmtMinSec(etappeS)}</div>
           </div>
           <div class="row">
             <span class="muted">Nächster Start</span>
