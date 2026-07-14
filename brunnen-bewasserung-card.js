@@ -865,6 +865,8 @@
           <ha-select
             label="Kartentyp"
             .value=${this._config.card_type || ""}
+            .fixedMenuPosition=${true}
+            .naturalMenuWidth=${true}
             @selected=${this._typeChanged}
             @closed=${(ev) => ev.stopPropagation()}
           >
