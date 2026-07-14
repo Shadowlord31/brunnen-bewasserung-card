@@ -148,6 +148,15 @@
       return { hass: {}, _config: {} };
     }
 
+    constructor() {
+      super();
+      // Merkt sich pro Geraet die hoechste beobachtete Restzeit eines Laufs,
+      // um den Fortschrittsbalken (Restzeit) korrekt von 100% auf 0% ablaufen
+      // zu lassen. "Etappe" und "Restzeit" sind beides Restzeiten und daher
+      // fuer eine direkte Verhaeltnisbildung ungeeignet.
+      this._peakRestzeit = {};
+    }
+
     setConfig(config) {
       if (!config.card_type) {
         throw new Error("card_type ist erforderlich (z.B. 'garten').");
@@ -455,9 +464,21 @@
       const automatikOn = this._val(e.automatik) === "on";
       const windIgnorieren = this._val(e.wind_ignorieren) === "on";
 
-      // Fortschritt der aktuellen Etappe relativ zur Restzeit als grobe
-      // visuelle Orientierung (kein exakter Prozentwert nötig).
-      const barPct = restzeitMin > 0 ? Math.min(100, (etappeS / (restzeitMin * 60)) * 100) : 0;
+      // "Restzeit" und "Etappe" zaehlen beide nur runter (Etappe = Restzeit
+      // des aktuellen Blocks), daher kein brauchbares Elapsed/Total-Verhaeltnis
+      // direkt aus den Sensoren ableitbar. Stattdessen merken wir uns die
+      // hoechste beobachtete Restzeit seit Laufbeginn als "Gesamtdauer" und
+      // lassen den Balken von 100% auf 0% ablaufen.
+      if (restzeitMin <= 0) {
+        delete this._peakRestzeit[deviceId];
+      } else if (
+        !this._peakRestzeit[deviceId] ||
+        restzeitMin > this._peakRestzeit[deviceId]
+      ) {
+        this._peakRestzeit[deviceId] = restzeitMin;
+      }
+      const peakRestzeit = this._peakRestzeit[deviceId] || restzeitMin || 1;
+      const barPct = peakRestzeit > 0 ? Math.min(100, (restzeitMin / peakRestzeit) * 100) : 0;
 
       return html`
         <ha-card>
