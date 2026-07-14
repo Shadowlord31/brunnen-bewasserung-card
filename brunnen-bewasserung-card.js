@@ -826,7 +826,7 @@
     }
 
     _typeChanged(ev) {
-      const card_type = ev.target.value;
+      const card_type = ev.detail.value;
       const isMulti = MULTI_DEVICE_TYPES.includes(card_type);
       const wasMulti = MULTI_DEVICE_TYPES.includes(this._config.card_type);
       let devices = this._config.devices || [];
@@ -862,18 +862,18 @@
 
       return html`
         <div class="form-row">
-          <ha-select
-            label="Kartentyp"
+          <ha-selector
+            .hass=${this.hass}
+            .selector=${{
+              select: {
+                mode: "dropdown",
+                options: CARD_TYPES.map((t) => ({ value: t.value, label: t.label })),
+              },
+            }}
             .value=${this._config.card_type || ""}
-            .fixedMenuPosition=${true}
-            .naturalMenuWidth=${true}
-            @selected=${this._typeChanged}
-            @closed=${(ev) => ev.stopPropagation()}
-          >
-            ${CARD_TYPES.map(
-              (t) => html`<mwc-list-item .value=${t.value}>${t.label}</mwc-list-item>`
-            )}
-          </ha-select>
+            .label=${"Kartentyp"}
+            @value-changed=${this._typeChanged}
+          ></ha-selector>
         </div>
         <div class="form-row">
           <ha-selector
