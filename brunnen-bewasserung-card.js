@@ -218,16 +218,16 @@
           height: 100%;
           transition: width 0.6s ease;
         }
-        .bar-bg.zone-bar {
+        .bar-bg.big-bar {
           height: 28px;
           border-radius: 8px;
         }
-        .bar-bg.zone-bar .bar-fill {
+        .bar-bg.big-bar .bar-fill {
           position: absolute;
           top: 0;
           left: 0;
         }
-        .bar-bg.zone-bar .bar-label {
+        .bar-bg.big-bar .bar-label {
           position: absolute;
           inset: 0;
           display: flex;
@@ -491,14 +491,12 @@
             <span>${manuellOffen} Zone(n)</span>
           </div>
           <div class="section-title">Brunnenzähler</div>
-          <div class="row">
-            <span class="muted">${zahler.toFixed(0)} / ${literBisPause.toFixed(0)} L</span>
-          </div>
-          <div class="bar-bg">
+          <div class="bar-bg big-bar">
             <div
               class="bar-fill"
               style="width:${pct}%; background:${pct > 85 ? "var(--warning-color,#ff9800)" : "var(--info-color,#2196f3)"}"
             ></div>
+            <div class="bar-label">${zahler.toFixed(0)} / ${literBisPause.toFixed(0)} L</div>
           </div>
           ${pauseRestzeit > 0
             ? html`<div class="row">
@@ -559,7 +557,7 @@
             <span class="muted">Restzeit</span>
             <span>${restzeitMin} min</span>
           </div>
-          <div class="bar-bg zone-bar">
+          <div class="bar-bg big-bar">
             <div class="bar-fill" style="width:${barPct}%; background:${color}"></div>
             <div class="bar-label">${fmtMinSec(etappeS)}</div>
           </div>
