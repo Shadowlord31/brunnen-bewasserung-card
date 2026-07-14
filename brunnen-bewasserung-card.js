@@ -190,6 +190,12 @@
           border-radius: 12px;
           background: var(--secondary-background-color);
         }
+        .settings-badge {
+          margin-left: auto;
+          --mdc-icon-button-size: 32px;
+          --mdc-icon-size: 20px;
+          color: var(--secondary-text-color);
+        }
         .row {
           display: flex;
           justify-content: space-between;
@@ -355,6 +361,43 @@
       `;
     }
 
+    // ---------------------------------------------------------------------
+    // Optionales Einstellungen-Badge (Navigation zu Seite oder More-Info-Popup)
+    // ---------------------------------------------------------------------
+    _navigate(path) {
+      history.pushState(null, "", path);
+      const event = new Event("location-changed", { bubbles: true, composed: true });
+      event.detail = { replace: false };
+      window.dispatchEvent(event);
+    }
+
+    _showMoreInfo(entityId) {
+      const event = new CustomEvent("hass-more-info", {
+        bubbles: true,
+        composed: true,
+        detail: { entityId },
+      });
+      this.dispatchEvent(event);
+    }
+
+    _settingsBadge() {
+      const path = this._config.settings_navigate;
+      const entity = this._config.settings_entity;
+      if (!path && !entity) return "";
+      return html`
+        <ha-icon-button
+          class="settings-badge"
+          @click=${(ev) => {
+            ev.stopPropagation();
+            if (path) this._navigate(path);
+            else this._showMoreInfo(entity);
+          }}
+        >
+          <ha-icon icon="mdi:cog"></ha-icon>
+        </ha-icon-button>
+      `;
+    }
+
     _missing(label) {
       return html`<ha-card
         ><div class="missing">
@@ -416,6 +459,7 @@
               style="background:${aktiv ? "var(--info-color, #2196f3)" : "var(--secondary-background-color)"}; color:${aktiv ? "white" : "inherit"}"
               >${aktiv ? "💧 Aktiv" : "Inaktiv"}</span
             >
+            ${this._settingsBadge()}
           </div>
           <div class="row">
             <span>🤖 Automatik</span>
@@ -488,6 +532,7 @@
             <span class="status-pill" style="background:${color}; color:white;"
               >${icon} ${label}</span
             >
+            ${this._settingsBadge()}
           </div>
           <div class="row">
             <span class="muted">Restzeit</span>
@@ -833,6 +878,7 @@
   ];
 
   const MULTI_DEVICE_TYPES = ["aktivitaet", "logbuch"];
+  const SETTINGS_BADGE_TYPES = ["garten", "automatik"];
 
   class BrunnenBewasserungCardEditor extends LitElement {
     static get properties() {
@@ -871,6 +917,18 @@
       const value = ev.detail.value;
       const devices = Array.isArray(value) ? value : value ? [value] : [];
       this._config = { ...this._config, devices };
+      this._fireChanged();
+    }
+
+    _settingsNavigateChanged(ev) {
+      const settings_navigate = ev.detail.value || undefined;
+      this._config = { ...this._config, settings_navigate };
+      this._fireChanged();
+    }
+
+    _settingsEntityChanged(ev) {
+      const settings_entity = ev.detail.value || undefined;
+      this._config = { ...this._config, settings_entity };
       this._fireChanged();
     }
 
@@ -916,6 +974,28 @@
             @value-changed=${this._devicesChanged}
           ></ha-selector>
         </div>
+        ${SETTINGS_BADGE_TYPES.includes(this._config.card_type)
+          ? html`
+              <div class="form-row">
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ text: {} }}
+                  .value=${this._config.settings_navigate || ""}
+                  .label=${"Einstellungen-Badge: Navigations-Pfad (optional, z.B. /lovelace-garten/einstellungen)"}
+                  @value-changed=${this._settingsNavigateChanged}
+                ></ha-selector>
+              </div>
+              <div class="form-row">
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ entity: {} }}
+                  .value=${this._config.settings_entity || ""}
+                  .label=${"Einstellungen-Badge: Popup-Entity (optional, wird ignoriert falls Pfad gesetzt ist)"}
+                  @value-changed=${this._settingsEntityChanged}
+                ></ha-selector>
+              </div>
+            `
+          : ""}
       `;
     }
   }
