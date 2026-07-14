@@ -559,7 +559,7 @@
           </div>
           <div class="bar-bg big-bar">
             <div class="bar-fill" style="width:${barPct}%; background:${color}"></div>
-            <div class="bar-label">${fmtMinSec(etappeS)}</div>
+            ${etappeS > 0 ? html`<div class="bar-label">${fmtMinSec(etappeS)}</div>` : ""}
           </div>
           <div class="row">
             <span class="muted">Nächster Start</span>
@@ -587,7 +587,7 @@
                             .checked=${windIgnorieren}
                             @change=${() => this._toggle(e.wind_ignorieren)}
                           ></ha-switch>
-                          <span>💨 Wind ignor.</span>
+                          <span>💨 Wind ignorieren</span>
                         </div>
                       `
                     : ""}
