@@ -233,8 +233,8 @@
         .settings-row:last-child {
           border-bottom: none;
         }
-        .settings-row ha-textfield {
-          width: 90px;
+        .settings-row ha-selector {
+          width: 120px;
         }
         .act-row {
           display: flex;
@@ -309,6 +309,41 @@
 
     _setTime(id, value) {
       this._call(id, "set_value", { time: value });
+    }
+
+    // ha-textfield/ha-time-input werden von HA nicht in jeder Ansicht
+    // vorab geladen und bleiben dann leer/nicht interaktiv. ha-selector
+    // ist immer verfügbar, daher nutzen wir number/time-Selector.
+    _numberField(id, unit) {
+      const s = this._st(id);
+      const attrs = s ? s.attributes : {};
+      return html`
+        <ha-selector
+          .hass=${this.hass}
+          .selector=${{
+            number: {
+              min: attrs.min ?? 0,
+              max: attrs.max ?? 1000,
+              step: attrs.step ?? 1,
+              mode: "box",
+              unit_of_measurement: unit,
+            },
+          }}
+          .value=${this._num(id)}
+          @value-changed=${(ev) => this._setNumber(id, ev.detail.value)}
+        ></ha-selector>
+      `;
+    }
+
+    _timeField(id) {
+      return html`
+        <ha-selector
+          .hass=${this.hass}
+          .selector=${{ time: {} }}
+          .value=${this._val(id)}
+          @value-changed=${(ev) => this._setTime(id, ev.detail.value)}
+        ></ha-selector>
+      `;
     }
 
     _missing(label) {
@@ -570,12 +605,7 @@
                       ><ha-icon icon=${icon} style="margin-right:8px;"></ha-icon
                       >${label}</span
                     >
-                    <ha-textfield
-                      type="number"
-                      .value=${this._val(id)}
-                      suffix=${unit}
-                      @change=${(ev) => this._setNumber(id, ev.target.value)}
-                    ></ha-textfield>
+                    ${this._numberField(id, unit)}
                   </div>
                 `
               : ""
@@ -587,10 +617,7 @@
                     ><ha-icon icon="mdi:clock-start" style="margin-right:8px;"></ha-icon
                     >Frühestzeit Start</span
                   >
-                  <ha-time-input
-                    .value=${this._val(e.fruehestzeit)}
-                    @change=${(ev) => this._setTime(e.fruehestzeit, ev.target.value)}
-                  ></ha-time-input>
+                  ${this._timeField(e.fruehestzeit)}
                 </div>
               `
             : ""}
@@ -620,10 +647,7 @@
                     ><ha-icon icon="mdi:clock-start" style="margin-right:8px;"></ha-icon
                     >Startzeit</span
                   >
-                  <ha-time-input
-                    .value=${this._val(e.startzeit)}
-                    @change=${(ev) => this._setTime(e.startzeit, ev.target.value)}
-                  ></ha-time-input>
+                  ${this._timeField(e.startzeit)}
                 </div>
               `
             : ""}
@@ -634,12 +658,7 @@
                     ><ha-icon icon="mdi:water-percent" style="margin-right:8px;"></ha-icon
                     >Ziel-Bodenfeuchte</span
                   >
-                  <ha-textfield
-                    type="number"
-                    suffix="%"
-                    .value=${this._val(e.ziel_feuchte)}
-                    @change=${(ev) => this._setNumber(e.ziel_feuchte, ev.target.value)}
-                  ></ha-textfield>
+                  ${this._numberField(e.ziel_feuchte, "%")}
                 </div>
               `
             : ""}
@@ -650,12 +669,7 @@
                     ><ha-icon icon="mdi:timer" style="margin-right:8px;"></ha-icon>Sekunden
                     pro Prozent</span
                   >
-                  <ha-textfield
-                    type="number"
-                    suffix="s/%"
-                    .value=${this._val(e.sek_pro_prozent)}
-                    @change=${(ev) => this._setNumber(e.sek_pro_prozent, ev.target.value)}
-                  ></ha-textfield>
+                  ${this._numberField(e.sek_pro_prozent, "s/%")}
                 </div>
               `
             : ""}
@@ -666,12 +680,7 @@
                     ><ha-icon icon="mdi:timer" style="margin-right:8px;"></ha-icon>Feste
                     Laufzeit</span
                   >
-                  <ha-textfield
-                    type="number"
-                    suffix="min"
-                    .value=${this._val(e.feste_laufzeit)}
-                    @change=${(ev) => this._setNumber(e.feste_laufzeit, ev.target.value)}
-                  ></ha-textfield>
+                  ${this._numberField(e.feste_laufzeit, "min")}
                 </div>
               `
             : ""}
